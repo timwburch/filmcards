@@ -79,9 +79,14 @@
 
   @media (max-width:560px){
     .provider-tabs button{min-width:0;font-size:11px;}
+    .lookup-fields{grid-template-columns:1fr;}
     .lookup-result{grid-template-columns:54px 1fr;}
     .lookup-result img,.result-image-placeholder{width:54px;height:72px;}
     .result-add{grid-column:1/-1;}
+  }
+
+  @media (hover:none){
+    .photo-actions{opacity:1;transform:none;}
   }
 
   .grid{
@@ -140,6 +145,15 @@
   .photo-well img{
     width:100%;height:100%;object-fit:cover;display:block;
   }
+  .photo-actions{
+    position:absolute;right:18px;bottom:18px;display:flex;gap:6px;z-index:1;
+    opacity:0;transform:translateY(4px);transition:opacity 150ms ease,transform 150ms ease;
+  }
+  .photo-well:hover .photo-actions,.photo-actions:focus-within{opacity:1;transform:none;}
+  .photo-actions button{
+    padding:7px 9px;border:1px solid rgba(255,255,255,.65);border-radius:4px;
+    background:rgba(24,22,20,.88);color:#fff;font:600 10px 'Work Sans',sans-serif;cursor:pointer;
+  }
   .photo-well .placeholder{
     text-align:center;padding:0 .3in;color:var(--muted);
     background:var(--well);
@@ -161,6 +175,9 @@
     font-family:monospace;color:#8f8c84;margin-top:6px;
   }
   .photo-well input[type=file]{display:none;}
+  .still-preview{display:none;margin:14px auto 0;width:min(100%,520px);max-height:260px;object-fit:contain;background:var(--well);}
+  .still-preview[data-visible="true"]{display:block;}
+  .still-help{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.4;}
 
   .text-well{
     flex:1;padding: 0 .22in .18in;
@@ -266,6 +283,7 @@
     }
     .card-frame:has([data-visible="true"]){display:none !important;}
     .photo-well{cursor:default;}
+    .photo-actions{display:none !important;}
     .placeholder .plus{display:none;}
     .addMovieButton{display:none !important;}
     .footer{display:none !important;}
@@ -325,6 +343,29 @@
   <div class="lookup-actions">
     <button type="button" id="add-manually">Add manually</button>
   </div>
+</dialog>
+
+<dialog id="still-lookup" aria-labelledby="still-lookup-title">
+  <div class="lookup-header">
+    <h2 id="still-lookup-title">Find a still frame</h2>
+    <button class="icon-button" type="button" data-close-still-dialog aria-label="Close">×</button>
+  </div>
+  <form class="lookup-form" id="still-lookup-form">
+    <div class="lookup-fields">
+      <input id="still-query" type="search" required autocomplete="off" aria-label="Still image search" placeholder="Movie title still frame">
+      <button type="button" id="search-images">Search images</button>
+    </div>
+    <p class="still-help">Open a result, copy its image address, then paste that address below.</p>
+    <div class="lookup-fields">
+      <input id="still-url" type="url" required autocomplete="off" aria-label="Image URL" placeholder="https://example.com/still.jpg">
+      <button type="button" id="preview-still">Preview</button>
+    </div>
+    <img class="still-preview" id="still-preview" alt="Selected still preview">
+    <p class="lookup-status" id="still-status" role="status"></p>
+    <div class="lookup-actions">
+      <button type="submit" id="use-still">Use this still</button>
+    </div>
+  </form>
 </dialog>
 
 <script type="module">
@@ -461,6 +502,10 @@ const createCard = async (i, m) => {
         <span class="fname">${escapeHtml(data.f)}</span>
       </div>
       <input type="file" accept="image/*">
+      <div class="photo-actions">
+        <button type="button" data-upload-still>Upload</button>
+        <button type="button" data-search-still>Search for a still</button>
+      </div>
     </div>
     <div class="text-well">
       <div class="title-row">
@@ -491,32 +536,36 @@ const createCard = async (i, m) => {
 
   const well = card.querySelector('.photo-well');
   const input = well.querySelector('input');
-  well.addEventListener('click', () => input.click());
-  input.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    // const url = URL.createObjectURL(file);
-    const url = await convertFileToBase64(file);
-    await set('film-still-' + i, url);
+  const showStill = (url) => {
     const p = well.querySelector('.placeholder');
     p.dataset.visible = 'false';
     p.style.display = 'none';
-    let img = well.querySelector('img');
+    let img = well.querySelector(':scope > img');
     if (!img) {
       img = document.createElement('img');
-      well.appendChild(img);
+      well.insertBefore(img, well.querySelector('.photo-actions'));
     }
     img.src = url;
+  };
+  well.addEventListener('click', event => {
+    if (!event.target.closest('button')) input.click();
+  });
+  well.querySelector('[data-upload-still]').addEventListener('click', () => input.click());
+  well.querySelector('[data-search-still]').addEventListener('click', () => {
+    const currentTitle = card.querySelector('[data-field="t"]').textContent.trim();
+    openStillLookup(i, currentTitle, showStill);
+  });
+  input.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = await convertFileToBase64(file);
+    await set('film-still-' + i, url);
+    showStill(url);
   });
 
   const savedUrl = await get('film-still-' + i);
   if (savedUrl) {
-    const p = well.querySelector('.placeholder');
-    p.dataset.visible = 'false';
-    p.style.display = 'none';
-    const img = document.createElement('img');
-    img.src = savedUrl;
-    well.appendChild(img);
+    showStill(savedUrl);
   }
 
   updateCardCount();
@@ -668,6 +717,64 @@ const imageUrlToDataUrl = async (url) => {
     return url;
   }
 };
+
+const stillDialog = document.getElementById('still-lookup');
+const stillForm = document.getElementById('still-lookup-form');
+const stillQuery = document.getElementById('still-query');
+const stillUrl = document.getElementById('still-url');
+const stillPreview = document.getElementById('still-preview');
+const stillStatus = document.getElementById('still-status');
+let selectedStill = null;
+
+const previewStill = () => {
+  if (!stillUrl.reportValidity()) return;
+  stillStatus.textContent = 'Loading preview…';
+  stillPreview.dataset.visible = 'true';
+  stillPreview.src = stillUrl.value.trim();
+};
+
+stillPreview.addEventListener('load', () => {
+  stillStatus.textContent = 'Preview loaded.';
+});
+stillPreview.addEventListener('error', () => {
+  stillPreview.dataset.visible = 'false';
+  stillStatus.textContent = 'That image could not be previewed. Try another image address.';
+});
+document.getElementById('preview-still').addEventListener('click', previewStill);
+document.getElementById('search-images').addEventListener('click', () => {
+  if (!stillQuery.reportValidity()) return;
+  window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(stillQuery.value.trim())}`, '_blank', 'noopener,noreferrer');
+});
+document.querySelector('[data-close-still-dialog]').addEventListener('click', () => stillDialog.close());
+
+const openStillLookup = (index, title, showStill) => {
+  selectedStill = { index, showStill };
+  stillQuery.value = `${title} movie still frame`;
+  stillUrl.value = '';
+  stillPreview.removeAttribute('src');
+  stillPreview.dataset.visible = 'false';
+  stillStatus.textContent = '';
+  stillDialog.showModal();
+  stillQuery.focus();
+};
+
+stillForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!selectedStill || !stillUrl.reportValidity()) return;
+  const useButton = document.getElementById('use-still');
+  useButton.disabled = true;
+  stillStatus.textContent = 'Saving still…';
+  try {
+    const savedUrl = await imageUrlToDataUrl(stillUrl.value.trim());
+    await set('film-still-' + selectedStill.index, savedUrl);
+    selectedStill.showStill(savedUrl);
+    stillDialog.close();
+  } catch (error) {
+    stillStatus.textContent = error.message;
+  } finally {
+    useButton.disabled = false;
+  }
+});
 
 const addLookupResult = async (result, button) => {
   button.disabled = true;
