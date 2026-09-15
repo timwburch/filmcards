@@ -192,6 +192,24 @@
     }
   }
 
+  .footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 0;
+    gap: 12px;
+
+    button {
+      font-size: 10px;
+      padding: 8px 12px;
+      color: var(--paper);
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  }
+
   /* ---------- print ---------- */
   @media print{
     @page{ size:4in 6in; margin:0; }
@@ -214,6 +232,7 @@
     .photo-well{cursor:default;}
     .placeholder .plus{display:none;}
     .addMovieButton{display:none !important;}
+    .footer{display:none !important;}
   }
 </style>
 </head>
@@ -228,7 +247,7 @@
     (the filename underneath tells you which one). Nothing you upload leaves your browser.
   </p>
   <div class="toolbar">
-    <button onclick="window.print()">Print all <span id="card-count">50</span> cards</button>
+    <button onclick="window.print()">Print all visible (<span id="card-count">-</span>) cards</button>
     <button class="secondary" onclick="document.querySelectorAll('.photo-well').forEach(w=>w.querySelector('input').click())" style="display:none"></button>
     <span class="hint">Print dialog → Paper size: 4×6 in (or "Index Card 4x6") → Margins: None</span>
   </div>
@@ -241,12 +260,22 @@
     </div>
   </div>
   <div class="footer">
-    <div class="resetFilms"><button onclick="resetFilmData()">Reset Films</button></div>
+    <div class="resetFilms"><button onclick="resetFilmData()">Load Kaela's Films</button></div>
+    <div class="clearFilms"><button onclick="clearFilmData()">Clear all Film Cards</button></div>
   </div>
 </div>
 
 <script type="module">
 import { get, set, del, entries as getAllEntries, clear as clearEntries } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
+
+const convertFileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 const films = [
 {t:"Peaky Blinders",y:"2013",g:"Crime, Drama",d:"Otto Bathurst, Tom Harper, Colm McCarthy",w:"Steven Knight, Toby Finlay, Stephen Russell",c:"Cillian Murphy, Helen McCrory, Paul Anderson, Sam Neill, Sophie Rundle",r:"55–83 min/ep",f:"Film_cards_-_9_of_50.jpeg"},
@@ -308,9 +337,10 @@ const films = [
 {t:"Tag",y:"2018",g:"Action, Comedy",d:"Jeff Tomsic",w:"Rob McKittrick, Mark Steilen",c:"Jeremy Renner, Jon Hamm, Jake Johnson, Isla Fisher, Ed Helms, Annabelle Wallis, Hannibal Buress",r:"101 min",f:"Film_cards_-_38_of_50.jpeg"}
 ];
 
-const cardCount = document.getElementById('card-count');
-cardCount.textContent = films.length;
-
+const updateCardCount = () => {
+  const cardCount = document.getElementById('card-count');
+  cardCount.textContent = grid.children.length - 1;
+};
 
 const grid = document.getElementById('grid');
 const addMovieButton = document.querySelector('.addMovieButton');
@@ -339,6 +369,7 @@ const createCard = async (i, m) => {
     frame.remove();
     await del('film-data-' + i);
     await del('film-still-' + i);
+    updateCardCount();
   });
   num.appendChild(remove);
 
@@ -410,6 +441,9 @@ const createCard = async (i, m) => {
     img.src = savedUrl;
     well.appendChild(img);
   }
+
+  updateCardCount();
+
 };
 
 const initialize = async () => {
@@ -437,15 +471,6 @@ const resetFilmData = async () => {
 
 window.resetFilmData = resetFilmData;
 
-const convertFileToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
-};
-
 const addMovie = () => {
   const grid = document.querySelector('.grid');
   const newIndex = grid.children.length;
@@ -462,6 +487,14 @@ const addMovie = () => {
 
 window.addMovie = addMovie;
 
+const clearFilmData = async () => {
+  await clearEntries();
+  const grid = document.querySelector('.grid');
+  grid.innerHTML = '';
+  grid.appendChild(addMovieButton);
+  updateCardCount();
+};
+window.clearFilmData = clearFilmData;
 
 </script>
 </body>
