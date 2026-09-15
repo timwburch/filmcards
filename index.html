@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Film Card Merge — 4×6 Print Template</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Antonio:wght@100..700&display=swap');
+
+  :root{
+    --paper:#EDEAE3;
+    --ink:#181614;
+    --rule:#181614;
+    --muted:#6b6862;
+    --accent:#9C3B2E;
+    --accent-hover:#bc321f;
+    --well:#dedad1;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#3a3733;font-family:'Work Sans',Arial,sans-serif;color:var(--ink);}
+
+  /* ---------- on-screen chrome (hidden on print) ---------- */
+  .chrome{
+    /* max-width:920px; */
+    margin:0 auto;padding:28px 24px 60px;
+  }
+  .chrome h1{
+    font-family:'Archivo Black',Arial,sans-serif;
+    color:#f3f1ea;font-size:28px;letter-spacing:.2px;margin:0 0 6px;
+  }
+  .chrome p{color:#c9c6bd;font-size:14.5px;line-height:1.55;max-width:640px;margin:0 0 18px;}
+  .chrome strong{color:#f3f1ea;}
+  .toolbar{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+    background:#2c2a27;border:1px solid #46433e;border-radius:10px;
+    padding:14px 16px;margin-bottom:28px;
+    position:sticky;
+    top: 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+    z-index: 1000;
+  }
+  .toolbar button{
+    font-family:'Work Sans',sans-serif;font-size:13.5px;font-weight:600;
+    background:var(--accent);color:#fff;border:none;border-radius:6px;
+    padding:10px 16px;cursor:pointer;
+  }
+  .toolbar button.secondary{background:transparent;border:1px solid #59564f;color:#e8e5dd;}
+  .toolbar .hint{font-size:12.5px;color:#a6a39a;margin-left:auto;}
+
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(4in + (8px * 2)),1fr));
+    gap:26px;
+    padding: 16px;
+  }
+
+  .card-frame{
+    background:#100f0d;padding:8px;border-radius:2px;
+    box-shadow:0 10px 24px rgba(0,0,0,.35);
+    
+    width:calc(4in + (8px * 2));
+  }
+  .card-number{
+    position:relative;
+    color:#8a877e;font-size:11px;letter-spacing:.08em;margin:0 0 6px 2px;
+
+    .card-remove{
+      position:absolute;
+      top:50%;
+      right:0px;
+
+      font-size: 24px;
+      color: var(--accent);
+      cursor: pointer;
+      transform: translateY(-50%);
+      transition: transform 150ms ease-in-out;
+      &:hover {
+        transform: translateY(-50%) scale(1.5);
+
+      }
+    }
+  }
+
+  /* ---------- the 4x6 card itself ---------- */
+  .card{
+    width:4in;height:6in;
+    background:var(--paper);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    position:relative;
+    /* margin: auto; */
+    /* border: 1px solid var(--rule); */
+  }
+  .photo-well{
+    height:3.55in;
+    background:var(--paper);
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    /* border-bottom:2px solid var(--ink); */
+    flex:none;
+    padding: 1.5em;
+  }
+  .photo-well img{
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  .photo-well .placeholder{
+    text-align:center;padding:0 .3in;color:var(--muted);
+    background:var(--well);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    border: 2px dashed transparent;
+    &:hover {
+      border-color: var(--muted);
+    }
+  }
+  .photo-well .placeholder .plus{
+    font-size:26px;line-height:1;margin-bottom:6px;color:var(--accent);
+  }
+  .photo-well .placeholder .fname{
+    font-size:10px;letter-spacing:.02em;word-break:break-all;
+    font-family:monospace;color:#8f8c84;margin-top:6px;
+  }
+  .photo-well input[type=file]{display:none;}
+
+  .text-well{
+    flex:1;padding: 0 .22in .18in;
+    display:flex;flex-direction:column;
+  }
+
+  .title-row{
+    display:flex;
+    display:block;
+    align-items:baseline;gap:.08in;
+    /* flex-wrap:wrap; */
+    margin-bottom:.09in;
+  }
+  .title-row .title{
+    font-family:'Antonio',Arial,sans-serif;
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:32px;line-height:1.05;letter-spacing:-.5px;
+    outline:none;
+  }
+  .title-row .year{
+    font-size:15px;color:var(--muted);font-weight:500;outline:none;
+    align-self:flex-end;
+  }
+  .meta{
+    font-size:9.6px;line-height:1.5;
+  }
+  .meta-row{
+    display:grid;grid-template-columns:.5in 1fr;
+    column-gap:.1in;margin-bottom:2px;
+  }
+  .meta-row .label{
+    color:var(--muted);font-weight:400;letter-spacing:.03em;
+    text-transform:lowercase;
+  }
+  .meta-row .value{outline:none; text-transform:uppercase;}
+  .spacer{flex:1;min-height:.06in;}
+  .genre-line{
+    font-size:9.6px;color:var(--muted);letter-spacing:.04em;
+    border-top:1px solid #c9c4b8;padding-top:5px;margin-top:6px;
+  }
+
+  [contenteditable]:hover{background:rgba(156,59,46,.06);}
+  [contenteditable]:focus{background:rgba(156,59,46,.1);}
+
+  .addMovieButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    button {
+      font-size: 14px;
+      padding: 8px 12px;
+      background: var(--accent);
+      color: var(--paper);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background, transform 150ms ease-in-out;
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+      transform: scale(1.05) translateY(-2px);
+    }
+  }
+
+  /* ---------- print ---------- */
+  @media print{
+    @page{ size:4in 6in; margin:0; }
+    html,body{background:var(--paper);}
+    .chrome { padding: 0 !important; margin: 0 !important; }
+    .chrome > *:not(.print-area){display:none !important;}
+    .toolbar{display:none !important;}
+    .card-number{display:none !important;}
+    .grid{display:block;gap:0;}
+    .card-frame{
+      box-shadow:none;padding:0;border-radius:0;
+      break-inside:avoid;page-break-after:always;
+      width:100%;
+      height:100%;
+      display:flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .card-frame:has([data-visible="true"]){display:none !important;}
+    .photo-well{cursor:default;}
+    .placeholder .plus{display:none;}
+    .addMovieButton{display:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <h1>Film Card Merge — 4×6 Print Template</h1>
+  <p>
+    Every field below is pre-filled from your spreadsheet and is <strong>click-to-edit</strong> —
+    click any word to fix a typo or shorten a long cast list before printing.
+    Click each photo panel to load the matching still from your own files
+    (the filename underneath tells you which one). Nothing you upload leaves your browser.
+  </p>
+  <div class="toolbar">
+    <button onclick="window.print()">Print all <span id="card-count">50</span> cards</button>
+    <button class="secondary" onclick="document.querySelectorAll('.photo-well').forEach(w=>w.querySelector('input').click())" style="display:none"></button>
+    <span class="hint">Print dialog → Paper size: 4×6 in (or "Index Card 4x6") → Margins: None</span>
+  </div>
+
+  <div class="grid print-area" id="grid" data-card-count="50">
+    <div class="addMovieButton">
+      <button onclick="addMovie()">Add Movie/Show 
+        <span class="plus">＋</span>
+      </button>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="resetFilms"><button onclick="resetFilmData()">Reset Films</button></div>
+  </div>
+</div>
+
+<script type="module">
+import { get, set, del, entries as getAllEntries, clear as clearEntries } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
+
+const films = [
+{t:"Peaky Blinders",y:"2013",g:"Crime, Drama",d:"Otto Bathurst, Tom Harper, Colm McCarthy",w:"Steven Knight, Toby Finlay, Stephen Russell",c:"Cillian Murphy, Helen McCrory, Paul Anderson, Sam Neill, Sophie Rundle",r:"55–83 min/ep",f:"Film_cards_-_9_of_50.jpeg"},
+{t:"The Bourne Identity",y:"2002",g:"Action, Thriller",d:"Doug Liman",w:"Tony Gilroy, William Blake Herron",c:"Matt Damon, Franka Potente, Julia Stiles",r:"119 min",f:"Film_cards_-_10_of_50.jpeg"},
+{t:"Indiana Jones and the Last Crusade",y:"1989",g:"Action, Adventure",d:"Steven Spielberg",w:"Jeffrey Boam; George Lucas, Menno Meyjes (story)",c:"Harrison Ford, Denholm Elliott, Julian Glover, Alison Doody, John Rhys-Davies, Sean Connery",r:"127 min",f:"Film_cards_-_4_of_50.jpeg"},
+{t:"Pitch Perfect",y:"2012",g:"Comedy, Music",d:"Jason Moore",w:"Kay Cannon",c:"Anna Kendrick, Brittany Snow, Rebel Wilson",r:"112 min",f:"Film_cards_-_1_of_50.jpeg"},
+{t:"Zoolander",y:"2001",g:"Comedy",d:"Ben Stiller",w:"Ben Stiller, Drake Sather, John Hamburg",c:"Ben Stiller, Owen Wilson, Will Ferrell",r:"89 min",f:"Film_cards_-_18_of_50.jpeg"},
+{t:"Saw",y:"2004",g:"Horror, Mystery, Thriller",d:"James Wan",w:"Leigh Whannell; James Wan (story)",c:"Cary Elwes, Leigh Whannell, Shawnee Smith, Tobin Bell",r:"103 min",f:"Film_cards_-_15_of_50.jpeg"},
+{t:"The Hunger Games",y:"2012",g:"Action, Adventure, Sci-Fi",d:"Gary Ross",w:"Gary Ross, Suzanne Collins, Billy Ray",c:"Jennifer Lawrence, Liam Hemsworth, Josh Hutcherson",r:"142 min",f:"Film_cards_-_12_of_50.jpeg"},
+{t:"Beauty and the Beast",y:"1991",g:"Animation, Family, Fantasy, Musical, Romance",d:"Gary Trousdale, Kirk Wise",w:"Linda Woolverton",c:"Paige O'Hara, Robby Benson, Angela Lansbury",r:"84 min",f:"Film_cards_-_6_of_50.jpeg"},
+{t:"All Quiet on the Western Front",y:"2022",g:"War, Drama",d:"Edward Berger",w:"Edward Berger, Lesley Paterson, Ian Stokell",c:"Felix Kammerer, Albrecht Schuch, Aaron Hilmer",r:"148 min",f:"Film_cards_-_3_of_50.jpeg"},
+{t:"Keeping Up with the Joneses",y:"2016",g:"Action, Comedy",d:"Greg Mottola",w:"Michael LeSieur",c:"Gal Gadot, Zach Galifianakis, Jon Hamm, Isla Fisher",r:"105 min",f:"Film_cards_-_17_of_50.jpeg"},
+{t:"What We Do in the Shadows",y:"2014",g:"Comedy, Horror",d:"Jemaine Clement, Taika Waititi",w:"Jemaine Clement, Taika Waititi",c:"Taika Waititi, Jemaine Clement, Jonathan Brugh",r:"86 min",f:"Film_cards_-_20_of_50.jpeg"},
+{t:"In Time",y:"2011",g:"Action, Crime, Sci-Fi, Thriller",d:"Andrew Niccol",w:"Andrew Niccol",c:"Justin Timberlake, Amanda Seyfried, Cillian Murphy",r:"109 min",f:"Film_cards_-_19_of_50.jpeg"},
+{t:"Mamma Mia!",y:"2008",g:"Comedy, Musical, Romance",d:"Phyllida Lloyd",w:"Catherine Johnson",c:"Meryl Streep, Amanda Seyfried, Pierce Brosnan, Colin Firth, Christine Baranski, Stellan Skarsgard, Dominic Cooper, Julie Walters",r:"109 min",f:"Film_cards_-_14_of_50.jpeg"},
+{t:"Percy Jackson & the Olympians: The Lightning Thief",y:"2010",g:"Adventure, Family, Fantasy",d:"Chris Columbus",w:"Craig Titley",c:"Logan Lerman, Brandon T. Jackson, Alexandra Daddario",r:"118 min",f:"Film_cards_-_8_of_50.jpeg"},
+{t:"Knives Out",y:"2019",g:"Comedy, Crime, Drama, Mystery",d:"Rian Johnson",w:"Rian Johnson",c:"Daniel Craig, Chris Evans, Ana de Armas",r:"130 min",f:"Film_cards_-_11_of_50.jpeg"},
+{t:"Gilmore Girls",y:"2000",g:"Comedy, Drama",d:"Amy Sherman-Palladino",w:"Amy Sherman-Palladino (creator)",c:"Lauren Graham, Alexis Bledel, Kelly Bishop, Edward Herrmann, Melissa McCarthy, Keiko Agena, Scott Patterson, Liza Weil, Yanic Truesdale, Sean Gunn",r:"39–45 min/ep",f:"Film_cards_-_5_of_50.jpeg"},
+{t:"Forrest Gump",y:"1994",g:"Drama, Romance",d:"Robert Zemeckis",w:"Eric Roth",c:"Tom Hanks, Robin Wright, Gary Sinise",r:"142 min",f:"Film_cards_-_2_of_50.jpeg"},
+{t:"Saw II",y:"2005",g:"Horror, Crime, Mystery, Thriller",d:"Darren Lynn Bousman",w:"Leigh Whannell, Darren Lynn Bousman",c:"Donnie Wahlberg, Beverley Mitchell, Shawnee Smith, Tobin Bell",r:"93 min",f:"Film_cards_-_16_of_50.jpeg"},
+{t:"The Lord of the Rings: The Fellowship of the Ring",y:"2001",g:"Adventure, Fantasy",d:"Peter Jackson",w:"Fran Walsh, Philippa Boyens, Peter Jackson",c:"Elijah Wood, Sean Astin, Billy Boyd, Ian McKellen, Orlando Bloom, Dominic Monaghan",r:"178 min",f:"Film_cards_-_13_of_50.jpeg"},
+{t:"Raiders of the Lost Ark",y:"1981",g:"Action, Adventure",d:"Steven Spielberg",w:"Lawrence Kasdan, George Lucas, Philip Kaufman",c:"Harrison Ford, Karen Allen, Paul Freeman",r:"115 min",f:"Film_cards_-_7_of_50.jpeg"},
+{t:"Chronicles of Narnia",y:"2005",g:"Adventure, Family, Fantasy",d:"Andrew Adamson",w:"Ann Peacock, Andrew Adamson, Christopher Markus, Stephen McFeely",c:"Georgie Henley, James McAvoy, Tilda Swinton",r:"143 min",f:"Film_cards_-_27_of_50.jpeg"},
+{t:"Taken",y:"2008",g:"Action, Thriller",d:"Pierre Morel",w:"Luc Besson, Robert Mark Kamen",c:"Liam Neeson, Maggie Grace, Famke Janssen",r:"90 min",f:"Film_cards_-_33_of_50.jpeg"},
+{t:"Jurassic Park",y:"1993",g:"Adventure, Sci-Fi",d:"Steven Spielberg",w:"Michael Crichton, David Koepp",c:"Sam Neill, Laura Dern, Jeff Goldblum",r:"127 min",f:"Film_cards_-_22_of_50.jpeg"},
+{t:"Murder Mystery",y:"2019",g:"Action, Comedy, Crime, Mystery",d:"Kyle Newacheck",w:"James Vanderbilt",c:"Jennifer Aniston, Adam Sandler",r:"97 min",f:"Film_cards_-_25_of_50.jpeg"},
+{t:"Kung Fu Panda",y:"2008",g:"Animation, Action, Adventure, Comedy",d:"John Stevenson, Mark Osborne",w:"Jonathan Aibel, Glenn Berger",c:"Jack Black, Dustin Hoffman, Angelina Jolie, Seth Rogen, Lucy Liu, David Cross, Jackie Chan, Randall Duk Kim, James Hong",r:"92 min",f:"Film_cards_-_28_of_50.jpeg"},
+{t:"Dawn of the Planet of the Apes",y:"2014",g:"Action, Drama, Sci-Fi",d:"Matt Reeves",w:"Mark Bomback, Rick Jaffa, Amanda Silver",c:"Andy Serkis, Jason Clarke, Gary Oldman, Toby Kebbell, Keri Russell",r:"130 min",f:"Film_cards_-_34_of_50.jpeg"},
+{t:"Doctor Strange",y:"2016",g:"Action, Adventure, Fantasy",d:"Scott Derrickson",w:"Jon Spaihts, Scott Derrickson, C. Robert Cargill",c:"Benedict Cumberbatch, Chiwetel Ejiofor, Rachel McAdams",r:"115 min",f:"Film_cards_-_31_of_50.jpeg"},
+{t:"Rush Hour",y:"1998",g:"Action, Comedy, Thriller",d:"Brett Ratner",w:"Ross LaManna, Jim Kouf",c:"Jackie Chan, Chris Tucker, Tom Wilkinson",r:"98 min",f:"Film_cards_-_32_of_50.jpeg"},
+{t:"Jumanji",y:"2017",g:"Action, Adventure, Comedy, Fantasy",d:"Jake Kasdan",w:"Chris McKenna, Erik Sommers, Scott Rosenberg, Jeff Pinkner",c:"Dwayne Johnson, Karen Gillan, Kevin Hart",r:"119 min",f:"Film_cards_-_23_of_50.jpeg"},
+{t:"Mulan",y:"1998",g:"Animation, Adventure, Comedy, Musical",d:"Barry Cook, Tony Bancroft",w:"Rita Hsiao, Chris Sanders, Philip LaZebnik",c:"Ming-Na Wen, Eddie Murphy, BD Wong",r:"88 min",f:"Film_cards_-_26_of_50.jpeg"},
+{t:"Home Alone",y:"1990",g:"Comedy, Family",d:"Chris Columbus",w:"John Hughes",c:"Macaulay Culkin, Joe Pesci, Daniel Stern",r:"103 min",f:"Film_cards_-_30_of_50.jpeg"},
+{t:"Notting Hill",y:"1999",g:"Comedy, Drama, Romance",d:"Roger Michell",w:"Richard Curtis",c:"Julia Roberts, Hugh Grant, Hugh Bonneville",r:"124 min",f:"Film_cards_-_21_of_50.jpeg"},
+{t:"Ready Player One",y:"2018",g:"Action, Adventure, Sci-Fi",d:"Steven Spielberg",w:"Zak Penn, Ernest Cline",c:"Tye Sheridan, Olivia Cooke, Mark Rylance, Ben Mendelson, Win Morisaki",r:"140 min",f:"Film_cards_-_24_of_50.jpeg"},
+{t:"The Martian",y:"2015",g:"Adventure, Drama, Sci-Fi",d:"Ridley Scott",w:"Drew Goddard",c:"Matt Damon, Jessica Chastain, Sebastian Stan",r:"144 min",f:"Film_cards_-_29_of_50.jpeg"},
+{t:"Rise of the Planet of the Apes",y:"2011",g:"Action, Drama, Sci-Fi",d:"Rupert Wyatt",w:"Rick Jaffa, Amanda Silver",c:"Andy Serkis, James Franco, John Lithgow, David Oyelowo, Freida Pinto, Tom Felton",r:"105 min",f:"Film_cards_-_35_of_50.jpeg"},
+{t:"Harry Potter and the Sorcerer's Stone",y:"2001",g:"Adventure, Family, Fantasy",d:"Chris Columbus",w:"J.K. Rowling (novel); Steve Kloves (screenplay)",c:"Daniel Radcliffe, Emma Watson, Rupert Grint, Tom Felton, Alan Rickman",r:"152 min",f:"Film_cards_-_45_of_50.jpeg (or your own still)"},
+{t:"Harry Potter and the Chamber of Secrets",y:"2002",g:"Adventure, Family, Fantasy",d:"Chris Columbus",w:"J.K. Rowling (novel); Steve Kloves (screenplay)",c:"Daniel Radcliffe, Emma Watson, Rupert Grint, Tom Felton, Alan Rickman",r:"161 min",f:"Film_cards_-_45_of_50.jpeg (or your own still)"},
+{t:"Harry Potter and the Prisoner of Azkaban",y:"2004",g:"Adventure, Family, Fantasy",d:"Alfonso Cuarón",w:"J.K. Rowling (novel); Steve Kloves (screenplay)",c:"Daniel Radcliffe, Emma Watson, Rupert Grint, Tom Felton, Alan Rickman",r:"142 min",f:"Film_cards_-_45_of_50.jpeg (or your own still)"},
+{t:"Harry Potter and the Goblet of Fire",y:"2005",g:"Adventure, Family, Fantasy",d:"Mike Newell",w:"J.K. Rowling (novel); Steve Kloves (screenplay)",c:"Daniel Radcliffe, Emma Watson, Rupert Grint, Tom Felton, Alan Rickman",r:"157 min",f:"Film_cards_-_45_of_50.jpeg (or your own still)"},
+{t:"Harry Potter and the Order of the Phoenix",y:"2007",g:"Adventure, Family, Fantasy",d:"David Yates",w:"J.K. Rowling (novel); Michael Goldenberg (screenplay)",c:"Daniel Radcliffe, Emma Watson, Rupert Grint, Tom Felton, Alan Rickman",r:"138 min",f:"Film_cards_-_45_of_50.jpeg (or your own still)"},
+{t:"Harry Potter and the Half-Blood Prince",y:"2009",g:"Adventure, Family, Fantasy",d:"David Yates",w:"J.K. Rowling (novel); Steve Kloves (screenplay)",c:"Daniel Radcliffe, Emma Watson, Rupert Grint, Tom Felton, Alan Rickman",r:"153 min",f:"Film_cards_-_45_of_50.jpeg (or your own still)"},
+{t:"Harry Potter and the Deathly Hallows: Part 1",y:"2010",g:"Adventure, Family, Fantasy",d:"David Yates",w:"J.K. Rowling (novel); Steve Kloves (screenplay)",c:"Daniel Radcliffe, Emma Watson, Rupert Grint, Tom Felton, Alan Rickman",r:"146 min",f:"Film_cards_-_45_of_50.jpeg (or your own still)"},
+{t:"Harry Potter and the Deathly Hallows: Part 2",y:"2011",g:"Adventure, Family, Fantasy",d:"David Yates",w:"J.K. Rowling (novel); Steve Kloves (screenplay)",c:"Daniel Radcliffe, Emma Watson, Rupert Grint, Tom Felton, Alan Rickman",r:"130 min",f:"Film_cards_-_45_of_50.jpeg (or your own still)"},
+{t:"Avatar: The Last Airbender",y:"2005–2008",g:"Action-Adventure, Fantasy",d:"Michael Dante DiMartino, Bryan Konietzko",w:"Michael Dante DiMartino, Bryan Konietzko",c:"Aang, Katara, Sokka, Toph, Zuko, Iroh, Azula",r:"23 min/ep",f:"Film_cards_-_36_of_50.jpeg"},
+{t:"Grease",y:"1978",g:"Comedy, Musical, Romance",d:"Randal Kleiser",w:"Bronte Woodard",c:"John Travolta, Olivia Newton-John",r:"110 min",f:"Film_cards_-_48_of_50.jpeg"},
+{t:"Gladiator",y:"2000",g:"Action, Adventure, Drama",d:"Ridley Scott",w:"David Franzoni, John Logan, William Nicholson",c:"Russell Crowe, Joaquin Phoenix, Connie Nielsen, Oliver Reed, Derek Jacobi",r:"155 min",f:"Film_cards_-_40_of_50.jpeg"},
+{t:"High School Musical",y:"2006",g:"Comedy, Drama, Family, Musical, Romance",d:"Kenny Ortega",w:"Peter Barsocchini",c:"Zac Efron, Vanessa Hudgens, Lucas Grabeel",r:"98 min",f:"Film_cards_-_47_of_50.jpeg"},
+{t:"Grown Ups",y:"2010",g:"Comedy",d:"Dennis Dugan",w:"Adam Sandler, Fred Wolf",c:"Adam Sandler, Kevin James, David Spade, Chris Rock, Rob Schneider",r:"102 min",f:"Film_cards_-_39_of_50.jpeg"},
+{t:"Fantastic Beasts",y:"2016",g:"Adventure, Family, Fantasy",d:"David Yates",w:"J.K. Rowling",c:"Eddie Redmayne, Katherine Waterston, Alison Sudol",r:"132 min",f:"Film_cards_-_42_of_50.jpeg"},
+{t:"Dexter",y:"2006",g:"Crime, Drama, Mystery",d:"John Dahl, Steve Shill, Keith Gordon",w:"James Manos Jr. (developer)",c:"Michael C. Hall, Jennifer Carpenter, David Zayas",r:"47–58 min/ep",f:"Film_cards_-_50_of_50.jpeg"},
+{t:"Michael",y:"2026",g:"Biography, Drama, Music",d:"Antoine Fuqua",w:"John Logan",c:"Jafaar Jackson, Colman Domingo, Nia Long, Kendrick Sampson, Miles Teller",r:"127 min",f:"Film_cards_-_41_of_50.jpeg"},
+{t:"Back to the Future",y:"1985",g:"Adventure, Comedy, Sci-Fi",d:"Robert Zemeckis",w:"Robert Zemeckis, Bob Gale",c:"Michael J. Fox, Christopher Lloyd, Lea Thompson",r:"116 min",f:"Film_cards_-_44_of_50.jpeg"},
+{t:"Game Night",y:"2018",g:"Action, Comedy, Mystery",d:"John Francis Daley, Jonathan Goldstein",w:"Mark Perez",c:"Jason Bateman, Rachel McAdams, Billy Magnussen",r:"100 min",f:"Film_cards_-_37_of_50.jpeg"},
+{t:"Elvis",y:"2022",g:"Biography, Drama, Music",d:"Baz Luhrmann",w:"Baz Luhrmann, Sam Bromell, Craig Pearce, Jeremy Doner",c:"Austin Butler, Tom Hanks",r:"159 min",f:"Film_cards_-_49_of_50.jpeg"},
+{t:"The Greatest Showman",y:"2017",g:"Biography, Drama, Musical",d:"Michael Gracey",w:"Jenny Bicks, Bill Condon",c:"Hugh Jackman, Michelle Williams, Zac Efron, Keala Settle, Zendaya",r:"105 min",f:"Film_cards_-_43_of_50.jpeg"},
+{t:"The Parent Trap",y:"1998",g:"Comedy, Family, Romance",d:"Nancy Meyers",w:"David Swift; Nancy Meyers, Charles Shyer",c:"Lindsay Lohan, Natasha Richardson, Dennis Quaid, Elaine Hendrix",r:"128 min",f:"Film_cards_-_46_of_50.jpeg"},
+{t:"Tag",y:"2018",g:"Action, Comedy",d:"Jeff Tomsic",w:"Rob McKittrick, Mark Steilen",c:"Jeremy Renner, Jon Hamm, Jake Johnson, Isla Fisher, Ed Helms, Annabelle Wallis, Hannibal Buress",r:"101 min",f:"Film_cards_-_38_of_50.jpeg"}
+];
+
+const cardCount = document.getElementById('card-count');
+cardCount.textContent = films.length;
+
+
+const grid = document.getElementById('grid');
+const addMovieButton = document.querySelector('.addMovieButton');
+
+const createCard = async (i, m) => {
+  if (m[0] === null) {
+    await set('film-data-' + i, m[1]);
+  }
+
+  const data = { ...m[1] };
+
+  const frame = document.createElement('div');
+  frame.className = 'card-frame';
+
+  const num = document.createElement('div');
+  num.className = 'card-number';
+  num.textContent = 'CARD ' + (i+1);
+  frame.appendChild(num);
+
+  const remove = document.createElement('div');
+  remove.className = 'card-remove';
+  remove.textContent = '×';
+  remove.addEventListener('click', async () => {
+    const confirmed = confirm(`Are you sure you want to remove this card? \n ${data.t}`);
+    if (!confirmed) return;
+    frame.remove();
+    await del('film-data-' + i);
+    await del('film-still-' + i);
+  });
+  num.appendChild(remove);
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  card.innerHTML = `
+    <div class="photo-well" data-idx="${i}">
+      <div class="placeholder" data-visible="true">
+        <div class="plus">＋</div>
+        Click to add this film's still<br>
+        <span class="fname">${data.f}</span>
+      </div>
+      <input type="file" accept="image/*">
+    </div>
+    <div class="text-well">
+      <div class="title-row">
+        <span class="title" contenteditable="true" data-field="t">${data.t}</span>
+        <span class="year" contenteditable="true" data-field="y">${data.y}</span>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><span class="label">Runtime</span><span class="value" contenteditable="true" data-field="r">${data.r}</span></div>
+        <div class="meta-row"><span class="label">Directed</span><span class="value" contenteditable="true" data-field="d">${data.d}</span></div>
+        <div class="meta-row"><span class="label">Written</span><span class="value" contenteditable="true" data-field="w">${data.w}</span></div>
+        <div class="meta-row"><span class="label">Starring</span><span class="value" contenteditable="true" data-field="c">${data.c}</span></div>
+      </div>
+      <div class="spacer"></div>
+      <div class="genre-line" contenteditable="true" data-field="g">${data.g}</div>
+    </div>
+  `;
+
+  frame.appendChild(card);
+  grid.insertBefore(frame, addMovieButton);
+
+  card.querySelectorAll('[data-field]').forEach(el => {
+    el.addEventListener('input', async () => {
+      const current = (await get('film-data-' + i)) || {};
+      current[el.dataset.field] = el.textContent;
+      await set('film-data-' + i, current);
+    });
+  });
+
+  const well = card.querySelector('.photo-well');
+  const input = well.querySelector('input');
+  well.addEventListener('click', () => input.click());
+  input.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    // const url = URL.createObjectURL(file);
+    const url = await convertFileToBase64(file);
+    await set('film-still-' + i, url);
+    const p = well.querySelector('.placeholder');
+    p.dataset.visible = 'false';
+    p.style.display = 'none';
+    let img = well.querySelector('img');
+    if (!img) {
+      img = document.createElement('img');
+      well.appendChild(img);
+    }
+    img.src = url;
+  });
+
+  const savedUrl = await get('film-still-' + i);
+  if (savedUrl) {
+    const p = well.querySelector('.placeholder');
+    p.dataset.visible = 'false';
+    p.style.display = 'none';
+    const img = document.createElement('img');
+    img.src = savedUrl;
+    well.appendChild(img);
+  }
+};
+
+const initialize = async () => {
+  const dbEntries = await getAllEntries();
+  const filmEntries = dbEntries.filter(([key, value]) => key.startsWith('film-data-'));
+  // console.log(filmEntries);
+
+  for (const [i, m] of filmEntries.entries()) {
+    // console.log(i, m);
+    createCard(i, m);
+  }
+};
+
+initialize();
+
+const resetFilmData = async () => {
+  await clearEntries();
+  const grid = document.querySelector('.grid');
+  grid.innerHTML = '';
+  grid.appendChild(addMovieButton);
+  for (const [i, m] of films.entries()) {
+    createCard(i, [null, m]);
+  }
+};
+
+window.resetFilmData = resetFilmData;
+
+const convertFileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
+const addMovie = () => {
+  const grid = document.querySelector('.grid');
+  const newIndex = grid.children.length;
+  createCard(newIndex, [ null, {
+    t: 'New Title',
+    y: 'Year',
+    r: 'Runtime',
+    d: 'Director',
+    w: 'Writer',
+    c: 'Cast',
+    g: 'Genre'
+  }]);
+};
+
+window.addMovie = addMovie;
+
+
+</script>
+</body>
+</html>
