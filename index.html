@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Film Card Merge — 4×6 Print Template</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
@@ -47,6 +48,46 @@
   }
   .toolbar button.secondary{background:transparent;border:1px solid #59564f;color:#e8e5dd;}
   .toolbar .hint{font-size:12.5px;color:#a6a39a;margin-left:auto;}
+
+  dialog{
+    width:680px;max-width:calc(100vw - 32px);min-width:0;max-height:calc(100vh - 32px);
+    padding:0;border:1px solid #5b5750;border-radius:8px;
+    background:#f3f1ea;color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.5);
+  }
+  dialog::backdrop{background:rgba(16,15,13,.78);}
+  .lookup-header,.lookup-form,.lookup-actions{padding:18px 20px;}
+  .lookup-header{display:flex;align-items:center;border-bottom:1px solid #d5d0c5;}
+  .lookup-header h2{font-family:'Archivo Black',Arial,sans-serif;font-size:19px;margin:0;}
+  .icon-button{margin-left:auto;border:0;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);}
+  .provider-tabs{display:flex;border:1px solid #bbb5aa;border-radius:6px;overflow:hidden;margin-bottom:14px;}
+  .provider-tabs button{flex:1;padding:9px;border:0;background:transparent;font:600 13px 'Work Sans',sans-serif;cursor:pointer;}
+  .provider-tabs button[aria-selected="true"]{background:var(--ink);color:#fff;}
+  .lookup-fields{display:grid;grid-template-columns:1fr auto;gap:8px;}
+  .lookup-fields input{min-width:0;padding:10px 11px;border:1px solid #aaa399;border-radius:5px;background:#fff;font:14px 'Work Sans',sans-serif;}
+  .lookup-fields button,.lookup-actions button,.result-add{padding:10px 14px;border:0;border-radius:5px;background:var(--accent);color:#fff;font:600 13px 'Work Sans',sans-serif;cursor:pointer;}
+  .api-key-row{display:flex;gap:8px;margin-top:8px;}
+  .api-key-row input{flex:1;min-width:0;}
+  .api-key-row a{align-self:center;color:var(--accent);font-size:12px;}
+  .lookup-status{min-height:20px;margin:12px 0 0;color:var(--muted);font-size:13px;}
+  .lookup-results{padding:0 20px 18px;display:grid;gap:8px;overflow:auto;}
+  .lookup-result{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;padding:8px;border:1px solid #d5d0c5;background:#fff;}
+  .lookup-result img,.result-image-placeholder{width:72px;height:90px;object-fit:cover;background:var(--well);}
+  .lookup-result h3{margin:0 0 4px;font-size:15px;}
+  .lookup-result p{margin:0;color:var(--muted);font-size:12px;}
+  .lookup-actions{border-top:1px solid #d5d0c5;text-align:right;}
+  .lookup-actions button{background:transparent;border:1px solid #aaa399;color:var(--ink);}
+
+  @media (max-width:560px){
+    .provider-tabs button{min-width:0;font-size:11px;}
+    .lookup-fields{grid-template-columns:1fr;}
+    .lookup-result{grid-template-columns:54px 1fr;}
+    .lookup-result img,.result-image-placeholder{width:54px;height:72px;}
+    .result-add{grid-column:1/-1;}
+  }
+
+  @media (hover:none){
+    .photo-actions{opacity:1;transform:none;}
+  }
 
   .grid{
     display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(4in + (8px * 2)),1fr));
@@ -104,6 +145,15 @@
   .photo-well img{
     width:100%;height:100%;object-fit:cover;display:block;
   }
+  .photo-actions{
+    position:absolute;right:18px;bottom:18px;display:flex;gap:6px;z-index:1;
+    opacity:0;transform:translateY(4px);transition:opacity 150ms ease,transform 150ms ease;
+  }
+  .photo-well:hover .photo-actions,.photo-actions:focus-within{opacity:1;transform:none;}
+  .photo-actions button{
+    padding:7px 9px;border:1px solid rgba(255,255,255,.65);border-radius:4px;
+    background:rgba(24,22,20,.88);color:#fff;font:600 10px 'Work Sans',sans-serif;cursor:pointer;
+  }
   .photo-well .placeholder{
     text-align:center;padding:0 .3in;color:var(--muted);
     background:var(--well);
@@ -125,6 +175,9 @@
     font-family:monospace;color:#8f8c84;margin-top:6px;
   }
   .photo-well input[type=file]{display:none;}
+  .still-preview{display:none;margin:14px auto 0;width:min(100%,520px);max-height:260px;object-fit:contain;background:var(--well);}
+  .still-preview[data-visible="true"]{display:block;}
+  .still-help{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.4;}
 
   .text-well{
     flex:1;padding: 0 .22in .18in;
@@ -230,6 +283,7 @@
     }
     .card-frame:has([data-visible="true"]){display:none !important;}
     .photo-well{cursor:default;}
+    .photo-actions{display:none !important;}
     .placeholder .plus{display:none;}
     .addMovieButton{display:none !important;}
     .footer{display:none !important;}
@@ -264,6 +318,55 @@
     <div class="clearFilms"><button onclick="clearFilmData()">Clear all Film Cards</button></div>
   </div>
 </div>
+
+<dialog id="movie-lookup" aria-labelledby="lookup-title">
+  <div class="lookup-header">
+    <h2 id="lookup-title">Add a movie or show</h2>
+    <button class="icon-button" type="button" data-close-dialog aria-label="Close">×</button>
+  </div>
+  <form class="lookup-form" id="lookup-form">
+    <div class="provider-tabs" role="tablist" aria-label="Search provider">
+      <button type="button" role="tab" data-provider="omdb" aria-selected="true">IMDb via OMDb</button>
+      <button type="button" role="tab" data-provider="tmdb" aria-selected="false">The Movie Database</button>
+    </div>
+    <div class="lookup-fields">
+      <input id="lookup-query" type="search" required autocomplete="off" placeholder="Movie or show title" aria-label="Movie or show title">
+      <button type="submit">Search</button>
+    </div>
+    <div class="api-key-row">
+      <input id="lookup-api-key" type="password" required autocomplete="off" placeholder="OMDb API key" aria-label="Provider API credential">
+      <a id="api-key-help" href="https://www.omdbapi.com/apikey.aspx" target="_blank" rel="noreferrer">Get a key</a>
+    </div>
+    <p class="lookup-status" id="lookup-status" role="status"></p>
+  </form>
+  <div class="lookup-results" id="lookup-results"></div>
+  <div class="lookup-actions">
+    <button type="button" id="add-manually">Add manually</button>
+  </div>
+</dialog>
+
+<dialog id="still-lookup" aria-labelledby="still-lookup-title">
+  <div class="lookup-header">
+    <h2 id="still-lookup-title">Find a still frame</h2>
+    <button class="icon-button" type="button" data-close-still-dialog aria-label="Close">×</button>
+  </div>
+  <form class="lookup-form" id="still-lookup-form">
+    <div class="lookup-fields">
+      <input id="still-query" type="search" required autocomplete="off" aria-label="Still image search" placeholder="Movie title still frame">
+      <button type="button" id="search-images">Search images</button>
+    </div>
+    <p class="still-help">Open a result, copy its image address, then paste that address below.</p>
+    <div class="lookup-fields">
+      <input id="still-url" type="url" required autocomplete="off" aria-label="Image URL" placeholder="https://example.com/still.jpg">
+      <button type="button" id="preview-still">Preview</button>
+    </div>
+    <img class="still-preview" id="still-preview" alt="Selected still preview">
+    <p class="lookup-status" id="still-status" role="status"></p>
+    <div class="lookup-actions">
+      <button type="submit" id="use-still">Use this still</button>
+    </div>
+  </form>
+</dialog>
 
 <script type="module">
 import { get, set, del, entries as getAllEntries, clear as clearEntries } from 'https://cdn.jsdelivr.net/npm/idb-keyval@6/+esm';
@@ -344,6 +447,21 @@ const updateCardCount = () => {
 
 const grid = document.getElementById('grid');
 const addMovieButton = document.querySelector('.addMovieButton');
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, character => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  "'": '&#39;',
+  '"': '&quot;'
+})[character]);
+
+const nextFilmIndex = async () => {
+  const keys = (await getAllEntries())
+    .map(([key]) => /^film-data-(\d+)$/.exec(key))
+    .filter(Boolean)
+    .map(match => Number(match[1]));
+  return keys.length ? Math.max(...keys) + 1 : 0;
+};
 
 const createCard = async (i, m) => {
   if (m[0] === null) {
@@ -381,23 +499,27 @@ const createCard = async (i, m) => {
       <div class="placeholder" data-visible="true">
         <div class="plus">＋</div>
         Click to add this film's still<br>
-        <span class="fname">${data.f}</span>
+        <span class="fname">${escapeHtml(data.f)}</span>
       </div>
       <input type="file" accept="image/*">
+      <div class="photo-actions">
+        <button type="button" data-upload-still>Upload</button>
+        <button type="button" data-search-still>Search for a still</button>
+      </div>
     </div>
     <div class="text-well">
       <div class="title-row">
-        <span class="title" contenteditable="true" data-field="t">${data.t}</span>
-        <span class="year" contenteditable="true" data-field="y">${data.y}</span>
+        <span class="title" contenteditable="true" data-field="t">${escapeHtml(data.t)}</span>
+        <span class="year" contenteditable="true" data-field="y">${escapeHtml(data.y)}</span>
       </div>
       <div class="meta">
-        <div class="meta-row"><span class="label">Runtime</span><span class="value" contenteditable="true" data-field="r">${data.r}</span></div>
-        <div class="meta-row"><span class="label">Directed</span><span class="value" contenteditable="true" data-field="d">${data.d}</span></div>
-        <div class="meta-row"><span class="label">Written</span><span class="value" contenteditable="true" data-field="w">${data.w}</span></div>
-        <div class="meta-row"><span class="label">Starring</span><span class="value" contenteditable="true" data-field="c">${data.c}</span></div>
+        <div class="meta-row"><span class="label">Runtime</span><span class="value" contenteditable="true" data-field="r">${escapeHtml(data.r)}</span></div>
+        <div class="meta-row"><span class="label">Directed</span><span class="value" contenteditable="true" data-field="d">${escapeHtml(data.d)}</span></div>
+        <div class="meta-row"><span class="label">Written</span><span class="value" contenteditable="true" data-field="w">${escapeHtml(data.w)}</span></div>
+        <div class="meta-row"><span class="label">Starring</span><span class="value" contenteditable="true" data-field="c">${escapeHtml(data.c)}</span></div>
       </div>
       <div class="spacer"></div>
-      <div class="genre-line" contenteditable="true" data-field="g">${data.g}</div>
+      <div class="genre-line" contenteditable="true" data-field="g">${escapeHtml(data.g)}</div>
     </div>
   `;
 
@@ -414,32 +536,36 @@ const createCard = async (i, m) => {
 
   const well = card.querySelector('.photo-well');
   const input = well.querySelector('input');
-  well.addEventListener('click', () => input.click());
-  input.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    // const url = URL.createObjectURL(file);
-    const url = await convertFileToBase64(file);
-    await set('film-still-' + i, url);
+  const showStill = (url) => {
     const p = well.querySelector('.placeholder');
     p.dataset.visible = 'false';
     p.style.display = 'none';
-    let img = well.querySelector('img');
+    let img = well.querySelector(':scope > img');
     if (!img) {
       img = document.createElement('img');
-      well.appendChild(img);
+      well.insertBefore(img, well.querySelector('.photo-actions'));
     }
     img.src = url;
+  };
+  well.addEventListener('click', event => {
+    if (!event.target.closest('button')) input.click();
+  });
+  well.querySelector('[data-upload-still]').addEventListener('click', () => input.click());
+  well.querySelector('[data-search-still]').addEventListener('click', () => {
+    const currentTitle = card.querySelector('[data-field="t"]').textContent.trim();
+    openStillLookup(i, currentTitle, showStill);
+  });
+  input.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = await convertFileToBase64(file);
+    await set('film-still-' + i, url);
+    showStill(url);
   });
 
   const savedUrl = await get('film-still-' + i);
   if (savedUrl) {
-    const p = well.querySelector('.placeholder');
-    p.dataset.visible = 'false';
-    p.style.display = 'none';
-    const img = document.createElement('img');
-    img.src = savedUrl;
-    well.appendChild(img);
+    showStill(savedUrl);
   }
 
   updateCardCount();
@@ -448,12 +574,13 @@ const createCard = async (i, m) => {
 
 const initialize = async () => {
   const dbEntries = await getAllEntries();
-  const filmEntries = dbEntries.filter(([key, value]) => key.startsWith('film-data-'));
-  // console.log(filmEntries);
+  const filmEntries = dbEntries
+    .filter(([key]) => key.startsWith('film-data-'))
+    .map(([key, value]) => [Number(key.slice('film-data-'.length)), value])
+    .sort(([firstIndex], [secondIndex]) => firstIndex - secondIndex);
 
-  for (const [i, m] of filmEntries.entries()) {
-    // console.log(i, m);
-    createCard(i, m);
+  for (const [index, film] of filmEntries) {
+    createCard(index, ['stored', film]);
   }
 };
 
@@ -471,18 +598,258 @@ const resetFilmData = async () => {
 
 window.resetFilmData = resetFilmData;
 
-const addMovie = () => {
-  const grid = document.querySelector('.grid');
-  const newIndex = grid.children.length;
-  createCard(newIndex, [ null, {
+const addBlankMovie = async () => {
+  const newIndex = await nextFilmIndex();
+  await createCard(newIndex, [ null, {
     t: 'New Title',
     y: 'Year',
     r: 'Runtime',
     d: 'Director',
     w: 'Writer',
     c: 'Cast',
-    g: 'Genre'
+    g: 'Genre',
+    f: 'Click to choose a still'
   }]);
+};
+
+const lookupDialog = document.getElementById('movie-lookup');
+const lookupForm = document.getElementById('lookup-form');
+const lookupQuery = document.getElementById('lookup-query');
+const lookupApiKey = document.getElementById('lookup-api-key');
+const lookupStatus = document.getElementById('lookup-status');
+const lookupResults = document.getElementById('lookup-results');
+const apiKeyHelp = document.getElementById('api-key-help');
+let lookupProvider = 'omdb';
+
+const providerConfig = {
+  omdb: { placeholder: 'OMDb API key', help: 'https://www.omdbapi.com/apikey.aspx' },
+  tmdb: { placeholder: 'TMDB read access token', help: 'https://www.themoviedb.org/settings/api' }
+};
+
+const setLookupProvider = (provider) => {
+  lookupProvider = provider;
+  document.querySelectorAll('[data-provider]').forEach(button => {
+    button.setAttribute('aria-selected', String(button.dataset.provider === provider));
+  });
+  lookupApiKey.placeholder = providerConfig[provider].placeholder;
+  lookupApiKey.value = localStorage.getItem(`${provider}-api-key`) || '';
+  apiKeyHelp.href = providerConfig[provider].help;
+  lookupResults.replaceChildren();
+  lookupStatus.textContent = '';
+};
+
+document.querySelectorAll('[data-provider]').forEach(button => {
+  button.addEventListener('click', () => setLookupProvider(button.dataset.provider));
+});
+
+const textList = (items, property) => items.map(item => item[property]).filter(Boolean).join(', ');
+
+const searchOmdb = async (query, apiKey) => {
+  const response = await fetch(`https://www.omdbapi.com/?apikey=${encodeURIComponent(apiKey)}&s=${encodeURIComponent(query)}`);
+  const data = await response.json();
+  if (!response.ok || data.Response === 'False') throw new Error(data.Error || 'IMDb search failed.');
+  return data.Search.map(item => ({
+    id: item.imdbID,
+    title: item.Title,
+    year: item.Year,
+    type: item.Type,
+    image: item.Poster !== 'N/A' ? item.Poster : ''
+  }));
+};
+
+const searchTmdb = async (query, token) => {
+  const response = await fetch(`https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(query)}&include_adult=false`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.status_message || 'TMDB search failed.');
+  return data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv').map(item => ({
+    id: item.id,
+    title: item.title || item.name,
+    year: (item.release_date || item.first_air_date || '').slice(0, 4),
+    type: item.media_type,
+    image: item.poster_path ? `https://image.tmdb.org/t/p/w185${item.poster_path}` : ''
+  }));
+};
+
+const getOmdbDetails = async (id, apiKey) => {
+  const response = await fetch(`https://www.omdbapi.com/?apikey=${encodeURIComponent(apiKey)}&i=${encodeURIComponent(id)}&plot=short`);
+  const item = await response.json();
+  if (!response.ok || item.Response === 'False') throw new Error(item.Error || 'Could not load IMDb details.');
+  return {
+    film: { t: item.Title, y: item.Year, r: item.Runtime, d: item.Director, w: item.Writer, c: item.Actors, g: item.Genre, f: 'IMDb poster' },
+    image: item.Poster !== 'N/A' ? item.Poster : ''
+  };
+};
+
+const getTmdbDetails = async (result, token) => {
+  const endpoint = result.type === 'tv' ? 'tv' : 'movie';
+  const response = await fetch(`https://api.themoviedb.org/3/${endpoint}/${result.id}?append_to_response=credits`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+  });
+  const item = await response.json();
+  if (!response.ok) throw new Error(item.status_message || 'Could not load TMDB details.');
+  const directors = item.credits.crew.filter(person => person.job === 'Director');
+  const writers = item.credits.crew.filter(person => ['Writer', 'Screenplay', 'Teleplay', 'Creator'].includes(person.job));
+  const runtime = endpoint === 'tv' ? item.episode_run_time?.[0] : item.runtime;
+  return {
+    film: {
+      t: item.title || item.name,
+      y: (item.release_date || item.first_air_date || '').slice(0, 4),
+      r: runtime ? `${runtime} min${endpoint === 'tv' ? '/ep' : ''}` : '',
+      d: textList(directors, 'name') || textList(item.created_by || [], 'name'),
+      w: textList(writers, 'name'),
+      c: textList(item.credits.cast.slice(0, 6), 'name'),
+      g: textList(item.genres, 'name'),
+      f: 'TMDB backdrop'
+    },
+    image: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : (item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : '')
+  };
+};
+
+const imageUrlToDataUrl = async (url) => {
+  if (!url) return '';
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return url;
+    return convertFileToBase64(await response.blob());
+  } catch {
+    return url;
+  }
+};
+
+const stillDialog = document.getElementById('still-lookup');
+const stillForm = document.getElementById('still-lookup-form');
+const stillQuery = document.getElementById('still-query');
+const stillUrl = document.getElementById('still-url');
+const stillPreview = document.getElementById('still-preview');
+const stillStatus = document.getElementById('still-status');
+let selectedStill = null;
+
+const previewStill = () => {
+  if (!stillUrl.reportValidity()) return;
+  stillStatus.textContent = 'Loading preview…';
+  stillPreview.dataset.visible = 'true';
+  stillPreview.src = stillUrl.value.trim();
+};
+
+stillPreview.addEventListener('load', () => {
+  stillStatus.textContent = 'Preview loaded.';
+});
+stillPreview.addEventListener('error', () => {
+  stillPreview.dataset.visible = 'false';
+  stillStatus.textContent = 'That image could not be previewed. Try another image address.';
+});
+document.getElementById('preview-still').addEventListener('click', previewStill);
+document.getElementById('search-images').addEventListener('click', () => {
+  if (!stillQuery.reportValidity()) return;
+  window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(stillQuery.value.trim())}`, '_blank', 'noopener,noreferrer');
+});
+document.querySelector('[data-close-still-dialog]').addEventListener('click', () => stillDialog.close());
+
+const openStillLookup = (index, title, showStill) => {
+  selectedStill = { index, showStill };
+  stillQuery.value = `${title} movie still frame`;
+  stillUrl.value = '';
+  stillPreview.removeAttribute('src');
+  stillPreview.dataset.visible = 'false';
+  stillStatus.textContent = '';
+  stillDialog.showModal();
+  stillQuery.focus();
+};
+
+stillForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!selectedStill || !stillUrl.reportValidity()) return;
+  const useButton = document.getElementById('use-still');
+  useButton.disabled = true;
+  stillStatus.textContent = 'Saving still…';
+  try {
+    const savedUrl = await imageUrlToDataUrl(stillUrl.value.trim());
+    await set('film-still-' + selectedStill.index, savedUrl);
+    selectedStill.showStill(savedUrl);
+    stillDialog.close();
+  } catch (error) {
+    stillStatus.textContent = error.message;
+  } finally {
+    useButton.disabled = false;
+  }
+});
+
+const addLookupResult = async (result, button) => {
+  button.disabled = true;
+  lookupStatus.textContent = `Loading ${result.title}…`;
+  try {
+    const apiKey = lookupApiKey.value.trim();
+    const details = lookupProvider === 'omdb'
+      ? await getOmdbDetails(result.id, apiKey)
+      : await getTmdbDetails(result, apiKey);
+    const newIndex = await nextFilmIndex();
+    await createCard(newIndex, [null, details.film]);
+    if (details.image) await set('film-still-' + newIndex, await imageUrlToDataUrl(details.image));
+    lookupDialog.close();
+    location.reload();
+  } catch (error) {
+    lookupStatus.textContent = error.message;
+    button.disabled = false;
+  }
+};
+
+const renderLookupResults = (results) => {
+  lookupResults.replaceChildren();
+  results.forEach(result => {
+    const row = document.createElement('article');
+    row.className = 'lookup-result';
+    const image = result.image ? document.createElement('img') : document.createElement('div');
+    if (result.image) {
+      image.src = result.image;
+      image.alt = '';
+    } else {
+      image.className = 'result-image-placeholder';
+    }
+    const copy = document.createElement('div');
+    const title = document.createElement('h3');
+    title.textContent = result.title;
+    const meta = document.createElement('p');
+    meta.textContent = [result.year, result.type].filter(Boolean).join(' · ');
+    copy.append(title, meta);
+    const addButton = document.createElement('button');
+    addButton.type = 'button';
+    addButton.className = 'result-add';
+    addButton.textContent = 'Add';
+    addButton.addEventListener('click', () => addLookupResult(result, addButton));
+    row.append(image, copy, addButton);
+    lookupResults.appendChild(row);
+  });
+  lookupStatus.textContent = results.length ? `${results.length} results` : 'No matching movies or shows found.';
+};
+
+lookupForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const apiKey = lookupApiKey.value.trim();
+  localStorage.setItem(`${lookupProvider}-api-key`, apiKey);
+  lookupStatus.textContent = 'Searching…';
+  lookupResults.replaceChildren();
+  try {
+    const results = lookupProvider === 'omdb'
+      ? await searchOmdb(lookupQuery.value.trim(), apiKey)
+      : await searchTmdb(lookupQuery.value.trim(), apiKey);
+    renderLookupResults(results);
+  } catch (error) {
+    lookupStatus.textContent = error.message;
+  }
+});
+
+document.querySelector('[data-close-dialog]').addEventListener('click', () => lookupDialog.close());
+document.getElementById('add-manually').addEventListener('click', async () => {
+  await addBlankMovie();
+  lookupDialog.close();
+});
+
+const addMovie = () => {
+  setLookupProvider(lookupProvider);
+  lookupDialog.showModal();
+  lookupQuery.focus();
 };
 
 window.addMovie = addMovie;
