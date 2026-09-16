@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Film Card Merge — 4×6 Print Template</title>
+<title>Film Card Maker</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
   @import url('https://fonts.googleapis.com/css2?family=Antonio:wght@100..700&display=swap');
@@ -266,12 +266,12 @@
   /* ---------- print ---------- */
   @media print{
     @page{ size:4in 6in; margin:0; }
-    html,body{background:var(--paper);}
+    html,body{background:var(--paper);margin:0;padding:0;}
     .chrome { padding: 0 !important; margin: 0 !important; }
     .chrome > *:not(.print-area){display:none !important;}
     .toolbar{display:none !important;}
     .card-number{display:none !important;}
-    .grid{display:block;gap:0;}
+    .grid{display:block;gap:0;padding:0;}
     .card-frame{
       box-shadow:none;padding:0;border-radius:0;
       break-inside:avoid;page-break-after:always;
@@ -301,6 +301,9 @@
     (the filename underneath tells you which one). Nothing you upload leaves your browser.
   </p>
   <div class="toolbar">
+      <button onclick="addMovie()">Add Movie/Show 
+        <span class="plus">＋</span>
+      </button>
     <button onclick="window.print()">Print all visible (<span id="card-count">-</span>) cards</button>
     <button class="secondary" onclick="document.querySelectorAll('.photo-well').forEach(w=>w.querySelector('input').click())" style="display:none"></button>
     <span class="hint">Print dialog → Paper size: 4×6 in (or "Index Card 4x6") → Margins: None</span>
@@ -313,6 +316,7 @@
       </button>
     </div>
   </div>
+
   <div class="footer">
     <div class="resetFilms"><button onclick="resetFilmData()">Load Kaela's Films</button></div>
     <div class="clearFilms"><button onclick="clearFilmData()">Clear all Film Cards</button></div>
