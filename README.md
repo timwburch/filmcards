@@ -72,8 +72,9 @@ Deploying the whole repo to Vercel serves the page and the API from one origin a
 
 ### Notes and limits
 
-- A session holds at most **500 cards**, and the whole batch is capped at **4 MB**. Uploaded stills are stored as base64 in `cards.still_url`, so a few large images will hit that ceiling — the save returns a clear error rather than truncating.
-- Saving an existing session replaces its card rows rather than merging them, so cards deleted in the browser also disappear from the database.
+- Each card is capped at **4 MB** and a session at **500 cards**. Uploaded stills are stored as base64 in `cards.still_url`, so a single oversized image is rejected by name rather than failing the whole save.
+- Cards are uploaded one request at a time, because a serverless function can only accept about 4.5 MB per request. A save therefore makes one `/api/session` call plus one `/api/card` call per card.
+- Saving an existing session prunes card rows the browser no longer has, so a save replaces rather than merges.
 - Access tokens are stored only as SHA-256 hashes; the plaintext exists solely in the emailed link and the visitor's `localStorage`.
 - Requesting access more than once a minute per address is rejected, and re-requesting on an already-approved address rotates the token and emails a fresh link.
 - To revoke someone, set their row's `status` to `revoked` in the `access_requests` table.

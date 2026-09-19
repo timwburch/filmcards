@@ -1131,15 +1131,36 @@ const saveSession = async () => {
   try {
     const cards = await collectCards();
     const existingId = localStorage.getItem(SESSION_KEY);
-    const saved = await apiFetch('/api/session', {
+
+    // Creates or renames the session and prunes cards deleted in the browser.
+    const session = await apiFetch('/api/session', {
       method: 'POST',
       auth: true,
-      body: { id: existingId || undefined, name: sessionName.value, cards }
+      body: {
+        id: existingId || undefined,
+        name: sessionName.value,
+        card_indexes: cards.map(card => card.card_index)
+      }
     });
 
-    localStorage.setItem(SESSION_KEY, saved.id);
-    sessionLink.value = sessionUrlFor(saved.id);
-    setSyncStatus(`Saved ${saved.card_count} cards.`);
+    localStorage.setItem(SESSION_KEY, session.id);
+    sessionLink.value = sessionUrlFor(session.id);
+
+    // One request per card keeps each still under its own 4 MB budget.
+    for (const [position, card] of cards.entries()) {
+      setSyncStatus(`Saving card ${position + 1} of ${cards.length}…`);
+      try {
+        await apiFetch('/api/card', {
+          method: 'POST',
+          auth: true,
+          body: { session_id: session.id, card }
+        });
+      } catch (error) {
+        throw new Error(`Card ${position + 1} (${card.title || 'untitled'}): ${error.message}`);
+      }
+    }
+
+    setSyncStatus(`Saved ${cards.length} cards.`);
     await refreshSessionList();
   } catch (error) {
     // A stale session id (deleted elsewhere) should fall back to a new record.
