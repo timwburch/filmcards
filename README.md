@@ -48,6 +48,8 @@ npm run db:migrate          # applies db/schema.sql
 npx vercel dev              # http://localhost:3000
 ```
 
+`db/schema.sql` is written with `create ... if not exists`, so it is safe to re-run. Vercel's build step runs it automatically via the `build` script, which means `DATABASE_URL` must be present in the build environment of every environment you deploy — including Preview, or those builds will fail.
+
 | Variable | Purpose |
 | --- | --- |
 | `DATABASE_URL` | Neon **pooled** connection string |
