@@ -1,0 +1,20 @@
+{
+  "name": "filmcards",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Printable 4x6 film cards with Neon-backed cloud sync.",
+  "scripts": {
+    "dev": "vercel dev",
+    "db:migrate": "psql \"$DATABASE_URL\" -f db/schema.sql"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  },
+  "devDependencies": {
+    "vercel": "^39.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
