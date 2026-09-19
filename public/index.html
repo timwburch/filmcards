@@ -4,291 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Film Card Maker</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Antonio:wght@100..700&display=swap');
-
-  :root{
-    --paper:#EDEAE3;
-    --ink:#181614;
-    --rule:#181614;
-    --muted:#6b6862;
-    --accent:#9C3B2E;
-    --accent-hover:#bc321f;
-    --well:#dedad1;
-  }
-
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:#3a3733;font-family:'Work Sans',Arial,sans-serif;color:var(--ink);}
-
-  /* ---------- on-screen chrome (hidden on print) ---------- */
-  .chrome{
-    /* max-width:920px; */
-    margin:0 auto;padding:28px 24px 60px;
-  }
-  .chrome h1{
-    font-family:'Archivo Black',Arial,sans-serif;
-    color:#f3f1ea;font-size:28px;letter-spacing:.2px;margin:0 0 6px;
-  }
-  .chrome p{color:#c9c6bd;font-size:14.5px;line-height:1.55;max-width:640px;margin:0 0 18px;}
-  .chrome strong{color:#f3f1ea;}
-  .toolbar{
-    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
-    background:#2c2a27;border:1px solid #46433e;border-radius:10px;
-    padding:14px 16px;margin-bottom:28px;
-    position:sticky;
-    top: 0;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.25);
-    z-index: 1000;
-  }
-  .toolbar button{
-    font-family:'Work Sans',sans-serif;font-size:13.5px;font-weight:600;
-    background:var(--accent);color:#fff;border:none;border-radius:6px;
-    padding:10px 16px;cursor:pointer;
-  }
-  .toolbar button.secondary{background:transparent;border:1px solid #59564f;color:#e8e5dd;}
-  .toolbar .hint{font-size:12.5px;color:#a6a39a;margin-left:auto;}
-
-  dialog{
-    width:680px;max-width:calc(100vw - 32px);min-width:0;max-height:calc(100vh - 32px);
-    padding:0;border:1px solid #5b5750;border-radius:8px;
-    background:#f3f1ea;color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.5);
-  }
-  dialog::backdrop{background:rgba(16,15,13,.78);}
-  .lookup-header,.lookup-form,.lookup-actions{padding:18px 20px;}
-  .lookup-header{display:flex;align-items:center;border-bottom:1px solid #d5d0c5;}
-  .lookup-header h2{font-family:'Archivo Black',Arial,sans-serif;font-size:19px;margin:0;}
-  .icon-button{margin-left:auto;border:0;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:var(--muted);}
-  .provider-tabs{display:flex;border:1px solid #bbb5aa;border-radius:6px;overflow:hidden;margin-bottom:14px;}
-  .provider-tabs button{flex:1;padding:9px;border:0;background:transparent;font:600 13px 'Work Sans',sans-serif;cursor:pointer;}
-  .provider-tabs button[aria-selected="true"]{background:var(--ink);color:#fff;}
-  .lookup-fields{display:grid;grid-template-columns:1fr auto;gap:8px;}
-  .lookup-fields input{min-width:0;padding:10px 11px;border:1px solid #aaa399;border-radius:5px;background:#fff;font:14px 'Work Sans',sans-serif;}
-  .lookup-fields button,.lookup-actions button,.result-add{padding:10px 14px;border:0;border-radius:5px;background:var(--accent);color:#fff;font:600 13px 'Work Sans',sans-serif;cursor:pointer;}
-  .api-key-row{display:flex;gap:8px;margin-top:8px;}
-  .api-key-row input{flex:1;min-width:0;}
-  .api-key-row a{align-self:center;color:var(--accent);font-size:12px;}
-  .lookup-status{min-height:20px;margin:12px 0 0;color:var(--muted);font-size:13px;}
-  .lookup-results{padding:0 20px 18px;display:grid;gap:8px;overflow:auto;}
-  .lookup-result{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;padding:8px;border:1px solid #d5d0c5;background:#fff;}
-  .lookup-result img,.result-image-placeholder{width:72px;height:90px;object-fit:cover;background:var(--well);}
-  .lookup-result h3{margin:0 0 4px;font-size:15px;}
-  .lookup-result p{margin:0;color:var(--muted);font-size:12px;}
-  .lookup-actions{border-top:1px solid #d5d0c5;text-align:right;}
-  .lookup-actions button{background:transparent;border:1px solid #aaa399;color:var(--ink);}
-
-  @media (max-width:560px){
-    .provider-tabs button{min-width:0;font-size:11px;}
-    .lookup-fields{grid-template-columns:1fr;}
-    .lookup-result{grid-template-columns:54px 1fr;}
-    .lookup-result img,.result-image-placeholder{width:54px;height:72px;}
-    .result-add{grid-column:1/-1;}
-  }
-
-  @media (hover:none){
-    .photo-actions{opacity:1;transform:none;}
-  }
-
-  .grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(4in + (8px * 2)),1fr));
-    gap:26px;
-    padding: 16px;
-  }
-
-  .card-frame{
-    background:#100f0d;padding:8px;border-radius:2px;
-    box-shadow:0 10px 24px rgba(0,0,0,.35);
-    
-    width:calc(4in + (8px * 2));
-  }
-  .card-number{
-    position:relative;
-    color:#8a877e;font-size:11px;letter-spacing:.08em;margin:0 0 6px 2px;
-
-    .card-remove{
-      position:absolute;
-      top:50%;
-      right:0px;
-
-      font-size: 24px;
-      color: var(--accent);
-      cursor: pointer;
-      transform: translateY(-50%);
-      transition: transform 150ms ease-in-out;
-      &:hover {
-        transform: translateY(-50%) scale(1.5);
-
-      }
-    }
-  }
-
-  /* ---------- the 4x6 card itself ---------- */
-  .card{
-    width:4in;height:6in;
-    background:var(--paper);
-    display:flex;flex-direction:column;
-    overflow:hidden;
-    position:relative;
-    /* margin: auto; */
-    /* border: 1px solid var(--rule); */
-  }
-  .photo-well{
-    height:3.55in;
-    background:var(--paper);
-    position:relative;
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
-    /* border-bottom:2px solid var(--ink); */
-    flex:none;
-    padding: 1.5em;
-  }
-  .photo-well img{
-    width:100%;height:100%;object-fit:cover;display:block;
-  }
-  .photo-actions{
-    position:absolute;right:18px;bottom:18px;display:flex;gap:6px;z-index:1;
-    opacity:0;transform:translateY(4px);transition:opacity 150ms ease,transform 150ms ease;
-  }
-  .photo-well:hover .photo-actions,.photo-actions:focus-within{opacity:1;transform:none;}
-  .photo-actions button{
-    padding:7px 9px;border:1px solid rgba(255,255,255,.65);border-radius:4px;
-    background:rgba(24,22,20,.88);color:#fff;font:600 10px 'Work Sans',sans-serif;cursor:pointer;
-  }
-  .photo-well .placeholder{
-    text-align:center;padding:0 .3in;color:var(--muted);
-    background:var(--well);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-flow: column;
-    justify-content: center;
-    border: 2px dashed transparent;
-    &:hover {
-      border-color: var(--muted);
-    }
-  }
-  .photo-well .placeholder .plus{
-    font-size:26px;line-height:1;margin-bottom:6px;color:var(--accent);
-  }
-  .photo-well .placeholder .fname{
-    font-size:10px;letter-spacing:.02em;word-break:break-all;
-    font-family:monospace;color:#8f8c84;margin-top:6px;
-  }
-  .photo-well input[type=file]{display:none;}
-  .still-preview{display:none;margin:14px auto 0;width:min(100%,520px);max-height:260px;object-fit:contain;background:var(--well);}
-  .still-preview[data-visible="true"]{display:block;}
-  .still-help{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.4;}
-
-  .text-well{
-    flex:1;padding: 0 .22in .18in;
-    display:flex;flex-direction:column;
-  }
-
-  .title-row{
-    display:flex;
-    display:block;
-    align-items:baseline;gap:.08in;
-    /* flex-wrap:wrap; */
-    margin-bottom:.09in;
-  }
-  .title-row .title{
-    font-family:'Antonio',Arial,sans-serif;
-    font-weight:700;
-    text-transform:uppercase;
-    font-size:32px;line-height:1.05;letter-spacing:-.5px;
-    outline:none;
-  }
-  .title-row .year{
-    font-size:15px;color:var(--muted);font-weight:500;outline:none;
-    align-self:flex-end;
-  }
-  .meta{
-    font-size:9.6px;line-height:1.5;
-  }
-  .meta-row{
-    display:grid;grid-template-columns:.5in 1fr;
-    column-gap:.1in;margin-bottom:2px;
-  }
-  .meta-row .label{
-    color:var(--muted);font-weight:400;letter-spacing:.03em;
-    text-transform:lowercase;
-  }
-  .meta-row .value{outline:none; text-transform:uppercase;}
-  .spacer{flex:1;min-height:.06in;}
-  .genre-line{
-    font-size:9.6px;color:var(--muted);letter-spacing:.04em;
-    border-top:1px solid #c9c4b8;padding-top:5px;margin-top:6px;
-  }
-
-  [contenteditable]:hover{background:rgba(156,59,46,.06);}
-  [contenteditable]:focus{background:rgba(156,59,46,.1);}
-
-  .addMovieButton {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    button {
-      font-size: 14px;
-      padding: 8px 12px;
-      background: var(--accent);
-      color: var(--paper);
-      border: 1px solid var(--accent);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background, transform 150ms ease-in-out;
-    }
-
-    button:hover {
-      background: var(--accent-hover);
-      transform: scale(1.05) translateY(-2px);
-    }
-  }
-
-  .footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 24px 0;
-    gap: 12px;
-
-    button {
-      font-size: 10px;
-      padding: 8px 12px;
-      color: var(--paper);
-      background: transparent;
-      border: 1px solid var(--accent);
-      border-radius: 4px;
-      cursor: pointer;
-    }
-  }
-
-  /* ---------- print ---------- */
-  @media print{
-    @page{ size:4in 6in; margin:0; }
-    html,body{background:var(--paper);margin:0;padding:0;}
-    .chrome { padding: 0 !important; margin: 0 !important; }
-    .chrome > *:not(.print-area){display:none !important;}
-    .toolbar{display:none !important;}
-    .card-number{display:none !important;}
-    .grid{display:block;gap:0;padding:0;}
-    .card-frame{
-      box-shadow:none;padding:0;border-radius:0;
-      break-inside:avoid;page-break-after:always;
-      width:100%;
-      height:100%;
-      display:flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .card-frame:has([data-visible="true"]){display:none !important;}
-    .photo-well{cursor:default;}
-    .photo-actions{display:none !important;}
-    .placeholder .plus{display:none;}
-    .addMovieButton{display:none !important;}
-    .footer{display:none !important;}
-  }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -305,6 +21,7 @@
         <span class="plus">＋</span>
       </button>
     <button onclick="window.print()">Print all visible (<span id="card-count">-</span>) cards</button>
+    <button class="secondary" id="open-cloud-sync" type="button">Cloud sync</button>
     <button class="secondary" onclick="document.querySelectorAll('.photo-well').forEach(w=>w.querySelector('input').click())" style="display:none"></button>
     <span class="hint">Print dialog → Paper size: 4×6 in (or "Index Card 4x6") → Margins: None</span>
   </div>
@@ -370,6 +87,67 @@
       <button type="submit" id="use-still">Use this still</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="cloud-sync" aria-labelledby="cloud-sync-title">
+  <div class="lookup-header">
+    <h2 id="cloud-sync-title">Cloud sync</h2>
+    <button class="icon-button" type="button" data-close-cloud-dialog aria-label="Close">×</button>
+  </div>
+
+  <div class="lookup-form">
+    <div class="sync-state" id="sync-state" data-state="locked">
+      <span class="sync-badge" id="sync-badge">Not approved</span>
+      <span class="sync-identity" id="sync-identity"></span>
+    </div>
+
+    <form id="access-form" class="sync-block">
+      <p class="still-help">
+        Saving to the shared database needs the owner's approval. Enter your email and
+        they'll get a message with a link to approve you.
+      </p>
+      <div class="lookup-fields">
+        <input id="access-email" type="email" required autocomplete="email"
+               placeholder="you@example.com" aria-label="Your email address">
+        <button type="submit" id="request-access">Request access</button>
+      </div>
+    </form>
+
+    <div class="sync-block">
+      <div class="lookup-fields">
+        <input id="session-name" type="text" autocomplete="off"
+               placeholder="Session name" aria-label="Session name" value="Film cards session">
+        <button type="button" id="save-session" disabled>Save to cloud</button>
+      </div>
+      <p class="still-help" id="save-help">The save button unlocks once your address is approved.</p>
+    </div>
+
+    <div class="sync-block">
+      <label class="sync-label" for="session-link">Shareable link to this session</label>
+      <div class="lookup-fields">
+        <input id="session-link" type="text" readonly placeholder="Save a session to get its link"
+               aria-label="Shareable session link">
+        <button type="button" id="copy-session-link">Copy</button>
+      </div>
+    </div>
+
+    <div class="sync-block">
+      <label class="sync-label" for="load-session-id">Load a stored session</label>
+      <div class="lookup-fields">
+        <input id="load-session-id" type="text" autocomplete="off"
+               placeholder="Session link or id" aria-label="Session link or id">
+        <button type="button" id="load-session">Load</button>
+      </div>
+      <p class="still-help">Loading replaces every card currently in this browser.</p>
+    </div>
+
+    <ul class="sync-list" id="session-list" hidden></ul>
+    <p class="lookup-status" id="sync-status" role="status"></p>
+  </div>
+
+  <div class="lookup-actions">
+    <button type="button" id="sign-out-sync">Forget this device</button>
+  </div>
 </dialog>
 
 <script type="module">
@@ -866,6 +644,302 @@ const clearFilmData = async () => {
   updateCardCount();
 };
 window.clearFilmData = clearFilmData;
+
+/* ---------------------------------------------------------------------------
+   Cloud sync — approval-gated saving of this browser's IndexedDB to Neon.
+   Set CLOUD_API_BASE to the deployed API origin when the page is hosted
+   somewhere else (e.g. GitHub Pages). Empty string means same origin.
+--------------------------------------------------------------------------- */
+const CLOUD_API_BASE = '';
+
+const TOKEN_KEY = 'filmcards:access-token';
+const EMAIL_KEY = 'filmcards:email';
+const SESSION_KEY = 'filmcards:session-id';
+
+const syncDialog = document.getElementById('cloud-sync');
+const syncState = document.getElementById('sync-state');
+const syncBadge = document.getElementById('sync-badge');
+const syncIdentity = document.getElementById('sync-identity');
+const syncStatus = document.getElementById('sync-status');
+const accessForm = document.getElementById('access-form');
+const accessEmail = document.getElementById('access-email');
+const requestAccessButton = document.getElementById('request-access');
+const sessionName = document.getElementById('session-name');
+const saveButton = document.getElementById('save-session');
+const saveHelp = document.getElementById('save-help');
+const sessionLink = document.getElementById('session-link');
+const loadSessionId = document.getElementById('load-session-id');
+const sessionList = document.getElementById('session-list');
+
+const readToken = () => localStorage.getItem(TOKEN_KEY) || '';
+const sessionUrlFor = (id) => `${location.origin}${location.pathname}?session=${id}`;
+
+const setSyncStatus = (message = '') => { syncStatus.textContent = message; };
+
+const apiFetch = async (path, { method = 'GET', body, auth = false } = {}) => {
+  const headers = {};
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (auth) headers.Authorization = `Bearer ${readToken()}`;
+
+  const response = await fetch(`${CLOUD_API_BASE}${path}`, {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body)
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || `Request failed (${response.status})`);
+  return payload;
+};
+
+const setApprovalState = (state, email = '') => {
+  const labels = { locked: 'Not approved', pending: 'Awaiting approval', approved: 'Approved' };
+  syncState.dataset.state = state;
+  syncBadge.textContent = labels[state];
+  syncIdentity.textContent = email;
+
+  const approved = state === 'approved';
+  saveButton.disabled = !approved;
+  saveHelp.textContent = approved
+    ? 'Each card is stored as its own row, linked to this session.'
+    : 'The save button unlocks once your address is approved.';
+
+  sessionList.hidden = !approved;
+  if (approved) refreshSessionList();
+};
+
+/** Validates any stored token against the API so a revoked device re-locks. */
+const refreshApproval = async () => {
+  const storedEmail = localStorage.getItem(EMAIL_KEY) || '';
+  if (!readToken()) {
+    setApprovalState(storedEmail ? 'pending' : 'locked', storedEmail);
+    return;
+  }
+
+  try {
+    const me = await apiFetch('/api/me', { auth: true });
+    localStorage.setItem(EMAIL_KEY, me.email);
+    setApprovalState('approved', me.email);
+  } catch {
+    localStorage.removeItem(TOKEN_KEY);
+    setApprovalState(storedEmail ? 'pending' : 'locked', storedEmail);
+  }
+};
+
+const refreshSessionList = async () => {
+  try {
+    const { sessions } = await apiFetch('/api/sessions', { auth: true });
+    sessionList.replaceChildren(...sessions.map(session => {
+      const item = document.createElement('li');
+
+      const label = document.createElement('span');
+      label.textContent = session.name;
+
+      const meta = document.createElement('span');
+      meta.className = 'sync-meta';
+      meta.textContent = `${session.card_count} cards · ${new Date(session.updated_at).toLocaleDateString()}`;
+
+      const load = document.createElement('button');
+      load.type = 'button';
+      load.textContent = 'Load';
+      load.addEventListener('click', () => loadSession(session.id));
+
+      item.append(label, meta, load);
+      return item;
+    }));
+    sessionList.hidden = sessions.length === 0;
+  } catch (error) {
+    setSyncStatus(error.message);
+  }
+};
+
+const rerenderCards = async () => {
+  const grid = document.querySelector('.grid');
+  grid.innerHTML = '';
+  grid.appendChild(addMovieButton);
+  await initialize();
+  updateCardCount();
+};
+
+// Database column -> the terse field name used in the `film-data-<n>` records.
+const CARD_FIELDS = {
+  title: 't', year: 'y', runtime: 'r', director: 'd',
+  writer: 'w', starring: 'c', genre: 'g', still_filename: 'f'
+};
+
+const collectCards = async () => {
+  const films = new Map();
+  const stills = new Map();
+
+  for (const [key, value] of await getAllEntries()) {
+    const film = /^film-data-(\d+)$/.exec(key);
+    if (film) { films.set(Number(film[1]), value); continue; }
+    const still = /^film-still-(\d+)$/.exec(key);
+    if (still) stills.set(Number(still[1]), value);
+  }
+
+  return [...films.entries()]
+    .sort(([left], [right]) => left - right)
+    .map(([index, film]) => Object.fromEntries([
+      ['card_index', index],
+      ['still_url', stills.get(index) ?? null],
+      ...Object.entries(CARD_FIELDS).map(([column, field]) => [column, film?.[field] ?? ''])
+    ]));
+};
+
+const restoreCards = async (cards) => {
+  await clearEntries();
+  for (const card of cards) {
+    const film = Object.fromEntries(
+      Object.entries(CARD_FIELDS).map(([column, field]) => [field, card[column] ?? ''])
+    );
+    await set('film-data-' + card.card_index, film);
+    if (card.still_url) await set('film-still-' + card.card_index, card.still_url);
+  }
+};
+
+const loadSession = async (rawId) => {
+  const id = (rawId.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i) || [])[0];
+  if (!id) {
+    setSyncStatus('That does not look like a session link or id.');
+    return;
+  }
+
+  setSyncStatus('Loading session…');
+  try {
+    const session = await apiFetch(`/api/session?id=${encodeURIComponent(id)}`);
+    await restoreCards(session.cards);
+
+    localStorage.setItem(SESSION_KEY, session.id);
+    sessionName.value = session.name;
+    sessionLink.value = sessionUrlFor(session.id);
+    await rerenderCards();
+    setSyncStatus(`Loaded “${session.name}” — ${session.card_count} cards.`);
+  } catch (error) {
+    setSyncStatus(error.message);
+  }
+};
+
+const saveSession = async () => {
+  saveButton.disabled = true;
+  setSyncStatus('Saving…');
+
+  try {
+    const cards = await collectCards();
+    const existingId = localStorage.getItem(SESSION_KEY);
+
+    // Creates or renames the session and prunes cards deleted in the browser.
+    const session = await apiFetch('/api/session', {
+      method: 'POST',
+      auth: true,
+      body: {
+        id: existingId || undefined,
+        name: sessionName.value,
+        card_indexes: cards.map(card => card.card_index)
+      }
+    });
+
+    localStorage.setItem(SESSION_KEY, session.id);
+    sessionLink.value = sessionUrlFor(session.id);
+
+    // One request per card keeps each still under its own 4 MB budget.
+    for (const [position, card] of cards.entries()) {
+      setSyncStatus(`Saving card ${position + 1} of ${cards.length}…`);
+      try {
+        await apiFetch('/api/card', {
+          method: 'POST',
+          auth: true,
+          body: { session_id: session.id, card }
+        });
+      } catch (error) {
+        throw new Error(`Card ${position + 1} (${card.title || 'untitled'}): ${error.message}`);
+      }
+    }
+
+    setSyncStatus(`Saved ${cards.length} cards.`);
+    await refreshSessionList();
+  } catch (error) {
+    // A stale session id (deleted elsewhere) should fall back to a new record.
+    if (/not yours|does not exist/i.test(error.message)) localStorage.removeItem(SESSION_KEY);
+    setSyncStatus(error.message);
+  } finally {
+    saveButton.disabled = false;
+  }
+};
+
+accessForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const email = accessEmail.value.trim();
+  requestAccessButton.disabled = true;
+  setSyncStatus('Sending request…');
+
+  try {
+    const result = await apiFetch('/api/request-access', { method: 'POST', body: { email } });
+    localStorage.setItem(EMAIL_KEY, email);
+    // Stays pending either way: approval only lands once the emailed link is opened.
+    setApprovalState('pending', email);
+    setSyncStatus(result.message);
+  } catch (error) {
+    setSyncStatus(error.message);
+  } finally {
+    requestAccessButton.disabled = false;
+  }
+});
+
+saveButton.addEventListener('click', saveSession);
+document.getElementById('load-session').addEventListener('click', () => loadSession(loadSessionId.value.trim()));
+
+document.getElementById('copy-session-link').addEventListener('click', async () => {
+  if (!sessionLink.value) return;
+  await navigator.clipboard.writeText(sessionLink.value);
+  setSyncStatus('Link copied.');
+});
+
+document.getElementById('sign-out-sync').addEventListener('click', () => {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(EMAIL_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  sessionLink.value = '';
+  setApprovalState('locked');
+  setSyncStatus('This device no longer holds an access token.');
+});
+
+document.querySelector('[data-close-cloud-dialog]').addEventListener('click', () => syncDialog.close());
+document.getElementById('open-cloud-sync').addEventListener('click', () => {
+  setSyncStatus('');
+  syncDialog.showModal();
+});
+
+const bootstrapCloudSync = async () => {
+  const params = new URLSearchParams(location.search);
+  const grantedToken = params.get('access');
+  const sharedSession = params.get('session');
+
+  // Strip credentials out of the address bar before anything else can log them.
+  if (grantedToken) {
+    localStorage.setItem(TOKEN_KEY, grantedToken);
+    params.delete('access');
+    const query = params.toString();
+    history.replaceState(null, '', `${location.pathname}${query ? `?${query}` : ''}`);
+  }
+
+  const storedEmail = localStorage.getItem(EMAIL_KEY);
+  if (storedEmail) accessEmail.value = storedEmail;
+
+  const storedSession = localStorage.getItem(SESSION_KEY);
+  if (storedSession) sessionLink.value = sessionUrlFor(storedSession);
+
+  await refreshApproval();
+
+  if (grantedToken) {
+    syncDialog.showModal();
+    setSyncStatus('Access approved — saving is unlocked on this device.');
+  }
+
+  if (sharedSession) await loadSession(sharedSession);
+};
+
+bootstrapCloudSync();
 
 </script>
 </body>
