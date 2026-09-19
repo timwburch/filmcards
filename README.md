@@ -57,16 +57,19 @@ npx vercel dev              # http://localhost:3000
 | `RESEND_FROM` | Verified sender, e.g. `Film Cards <noreply@example.com>` |
 | `OWNER_EMAIL` | Where approval requests are delivered |
 | `API_BASE_URL` | Public origin serving `/api`, no trailing slash |
-| `SITE_URL` | Public origin serving `index.html` |
+| `SITE_URL` | Public origin serving `public/index.html` |
 | `ALLOWED_ORIGINS` | Comma-separated origins permitted to call the API |
 
 Add the same variables in the Vercel project settings, then deploy with `npx vercel --prod`.
 
 ### Hosting the page on GitHub Pages
 
-Deploying the whole repo to Vercel serves the page and the API from one origin and needs no extra configuration. To keep the page on GitHub Pages instead, deploy only the API to Vercel and then:
+Deploying the whole repo to Vercel serves the page and the API from one origin and needs no extra configuration. The static page lives in `public/`, which Vercel uses as its output directory.
 
-- set `CLOUD_API_BASE` in [index.html](index.html) to the Vercel origin, e.g. `https://filmcards.vercel.app`
+To keep the page on GitHub Pages instead, deploy only the API to Vercel and then:
+
+- point GitHub Pages at the `/public` folder under **Settings → Pages**, since `index.html` is no longer at the repository root
+- set `CLOUD_API_BASE` in [public/index.html](public/index.html) to the Vercel origin, e.g. `https://filmcards.vercel.app`
 - set `SITE_URL` to the Pages URL, e.g. `https://timburch.github.io/filmcards`
 - include the Pages origin in `ALLOWED_ORIGINS`
 
