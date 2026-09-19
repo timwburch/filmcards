@@ -6,6 +6,8 @@
   "description": "Printable 4x6 film cards with Neon-backed cloud sync.",
   "scripts": {
     "dev": "vercel dev",
+    "build": "npm run prebuild-script",
+    "prebuild-script": "npm run db:migrate",
     "db:migrate": "psql \"$DATABASE_URL\" -f db/schema.sql"
   },
   "dependencies": {
